@@ -1,44 +1,48 @@
 steps:
-  # 1. Crear tabla si no existe
+  # Paso 1: DDL
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
         echo ">> Aplicando DDL..."
-        bq query --use_legacy_sql=false --project_id=${PROJECT_ID} < sql/ddl/tablas_riesgos.sql
+        sed -i "s/{{PROJECT_ID}}/${REPO_NAME}/g" sql/ddl/tablas_riesgos.sql
+        bq query --use_legacy_sql=false --project_id=${REPO_NAME} < sql/ddl/tablas_riesgos.sql
 
-  # 2. Cargar datos semilla solo si tabla vacía
+  # Paso 2: Seed de datos
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        ROWS=$(bq query --use_legacy_sql=false --project_id=${PROJECT_ID} --format=csv "SELECT COUNT(*) FROM \`${PROJECT_ID}.riesgos.transacciones\`" | tail -n 1)
+        sed -i "s/{{PROJECT_ID}}/${REPO_NAME}/g" sql/seed/load_sample_data.sql
+        ROWS=$(bq query --use_legacy_sql=false --project_id=${REPO_NAME} --format=csv "SELECT COUNT(*) FROM \`${REPO_NAME}.riesgos.transacciones\`" | tail -n 1)
         if [ "$$ROWS" -eq "0" ]; then
           echo ">> Cargando datos de muestra..."
-          bq query --use_legacy_sql=false --project_id=${PROJECT_ID} < sql/seed/load_sample_data.sql
+          bq query --use_legacy_sql=false --project_id=${REPO_NAME} < sql/seed/load_sample_data.sql
         else
           echo ">> Saltando seed (ya hay $$ROWS filas)"
         fi
 
-  # 3. Ejecutar Caso 1 (AML)
+  # Paso 3: Caso 1 AML
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
+        sed -i "s/{{PROJECT_ID}}/${REPO_NAME}/g" sql/reports/caso_1_aml.sql
         echo ">> Reporte AML (Caso 1)..."
-        bq query --use_legacy_sql=false --project_id=${PROJECT_ID} --max_rows=100 < sql/reports/caso_1_aml.sql
+        bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_1_aml.sql
 
-  # 4. Ejecutar Caso 2 (Smurfing)
+  # Paso 4: Caso 2 Smurfing
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
+        sed -i "s/{{PROJECT_ID}}/${REPO_NAME}/g" sql/reports/caso_2_smurfing.sql
         echo ">> Reporte Smurfing (Caso 2)..."
-        bq query --use_legacy_sql=false --project_id=${PROJECT_ID} --max_rows=100 < sql/reports/caso_2_smurfing.sql
+        bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_2_smurfing.sql
 
 options:
   defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET

@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `riesgos.transacciones` (
+CREATE TABLE IF NOT EXISTS `{{PROJECT_ID}}.riesgos.transacciones` (
     id_transaccion STRING NOT NULL,
     id_cliente INT64,
     id_cuenta INT64,

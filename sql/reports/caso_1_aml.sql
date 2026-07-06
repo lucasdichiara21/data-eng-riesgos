@@ -3,7 +3,7 @@ WITH depositos_mensuales AS (
     id_cliente,
     DATE_TRUNC(fecha, MONTH) AS mes,
     SUM(monto) AS total_depositado
-  FROM `riesgos.transacciones`
+  FROM `{{PROJECT_ID}}.riesgos.transacciones`
   WHERE tipo = 'DEPOSITO'
     AND EXTRACT(YEAR FROM fecha) = 2024
   GROUP BY id_cliente, mes

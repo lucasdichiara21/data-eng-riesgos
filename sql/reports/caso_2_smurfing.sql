@@ -4,7 +4,7 @@ WITH diario AS (
     DATE(fecha) AS dia,
     SUM(monto) AS suma_diaria,
     COUNT(*) AS num_tx
-  FROM `riesgos.transacciones`
+  FROM `{{PROJECT_ID}}.riesgos.transacciones`
   WHERE tipo = 'TRANSFERENCIA'
     AND monto < 3000
     AND EXTRACT(YEAR FROM fecha) = 2024
