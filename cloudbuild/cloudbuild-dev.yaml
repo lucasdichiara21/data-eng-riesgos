@@ -1,45 +1,108 @@
 steps:
-  # 1. DDL
+  # 1. Crear tabla
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
         echo ">> Aplicando DDL..."
-        cat sql/ddl/tablas_riesgos.sql | sed "s/{{PROJECT_ID}}/${REPO_NAME}/g" | bq query --use_legacy_sql=false --project_id=${REPO_NAME}
+        echo "
+        CREATE TABLE IF NOT EXISTS \`${REPO_NAME}.riesgos.transacciones\`
+        (
+          id_transaccion STRING,
+          id_cliente INT64,
+          id_cuenta INT64,
+          fecha TIMESTAMP,
+          monto NUMERIC,
+          tipo STRING,
+          canal STRING,
+          id_contraparte INT64,
+          pais_origen STRING,
+          pais_destino STRING,
+          metadata JSON
+        )
+        PARTITION BY DATE(fecha)
+        CLUSTER BY id_cliente, tipo;
+        " | bq query --use_legacy_sql=false --project_id=${REPO_NAME}
 
-  # 2. Seed
+  # 2. Seed (cargar datos)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        # Primero contamos filas para decidir si cargar
         ROWS=$(bq query --use_legacy_sql=false --project_id=${REPO_NAME} --format=csv "SELECT COUNT(*) FROM \`${REPO_NAME}.riesgos.transacciones\`" | tail -n 1)
         if [ "$$ROWS" -eq "0" ]; then
           echo ">> Cargando datos de muestra..."
-          cat sql/seed/load_sample_data.sql | sed "s/{{PROJECT_ID}}/${REPO_NAME}/g" | bq query --use_legacy_sql=false --project_id=${REPO_NAME}
+          echo "
+          INSERT INTO \`${REPO_NAME}.riesgos.transacciones\`
+          SELECT 
+            GENERATE_UUID() AS id_transaccion,
+            CAST(RAND()*10000 AS INT64) AS id_cliente,
+            CAST(RAND()*5000 AS INT64) AS id_cuenta,
+            TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL CAST(RAND()*365 AS INT64) DAY) AS fecha,
+            ROUND(RAND()*5000, 2) AS monto,
+            ['DEPOSITO','RETIRO','TRANSFERENCIA','PAGO_TARJETA'][OFFSET(CAST(RAND()*4 AS INT64))] AS tipo,
+            ['APP','WEB','SUCURSAL','ATM'][OFFSET(CAST(RAND()*4 AS INT64))] AS canal,
+            CAST(RAND()*1000 AS INT64) AS id_contraparte,
+            IF(RAND() > 0.5, 'MX', 'US') AS pais_origen,
+            IF(RAND() > 0.5, 'MX', 'US') AS pais_destino,
+            TO_JSON(STRUCT(
+              ROUND(CAST(RAND()*90 + 10 AS NUMERIC), 6) AS lat,
+              ROUND(CAST(RAND()*180 - 90 AS NUMERIC), 6) AS lon
+            )) AS metadata
+          FROM UNNEST(GENERATE_ARRAY(1, 100000));
+          " | bq query --use_legacy_sql=false --project_id=${REPO_NAME}
         else
           echo ">> Saltando seed (ya hay $$ROWS filas)"
         fi
 
-  # 3. Caso 1
+  # 3. Caso 1 AML
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
         echo ">> Reporte AML (Caso 1)..."
-        cat sql/reports/caso_1_aml.sql | sed "s/{{PROJECT_ID}}/${REPO_NAME}/g" | bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100
+        echo "
+        WITH depositos_mensuales AS (
+          SELECT 
+            id_cliente,
+            DATE_TRUNC(fecha, MONTH) AS mes,
+            SUM(monto) AS total_depositado
+          FROM \`${REPO_NAME}.riesgos.transacciones\`
+          WHERE tipo = 'DEPOSITO'
+            AND EXTRACT(YEAR FROM fecha) = 2024
+          GROUP BY id_cliente, mes
+          HAVING total_depositado > 50000
+        )
+        SELECT * FROM depositos_mensuales
+        ORDER BY total_depositado DESC;
+        " | bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100
 
-  # 4. Caso 2
+  # 4. Caso 2 Smurfing
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
         echo ">> Reporte Smurfing (Caso 2)..."
-        cat sql/reports/caso_2_smurfing.sql | sed "s/{{PROJECT_ID}}/${REPO_NAME}/g" | bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100
+        echo "
+        WITH diario AS (
+          SELECT 
+            id_cliente,
+            DATE(fecha) AS dia,
+            SUM(monto) AS suma_diaria,
+            COUNT(*) AS num_tx
+          FROM \`${REPO_NAME}.riesgos.transacciones\`
+          WHERE tipo = 'TRANSFERENCIA'
+            AND monto < 3000
+            AND EXTRACT(YEAR FROM fecha) = 2024
+          GROUP BY id_cliente, dia
+          HAVING suma_diaria > 9000
+        )
+        SELECT *, TRUE AS alerta_smurfing FROM diario;
+        " | bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100
 
 options:
   defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
