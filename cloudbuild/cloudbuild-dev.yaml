@@ -1,5 +1,5 @@
 steps:
-  # Crear tabla si no existe
+  # 1. Crear tabla si no existe
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -8,21 +8,21 @@ steps:
         echo ">> Aplicando DDL..."
         bq query --use_legacy_sql=false --project_id=${PROJECT_ID} < sql/ddl/tablas_riesgos.sql
 
-  # Cargar datos semilla solo si tabla vacía
+  # 2. Cargar datos semilla solo si tabla vacía
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
         ROWS=$(bq query --use_legacy_sql=false --project_id=${PROJECT_ID} --format=csv "SELECT COUNT(*) FROM \`${PROJECT_ID}.riesgos.transacciones\`" | tail -n 1)
-        if [ "$ROWS" -eq "0" ]; then
+        if [ "$$ROWS" -eq "0" ]; then
           echo ">> Cargando datos de muestra..."
           bq query --use_legacy_sql=false --project_id=${PROJECT_ID} < sql/seed/load_sample_data.sql
         else
-          echo ">> Saltando seed (ya hay $ROWS filas)"
+          echo ">> Saltando seed (ya hay $$ROWS filas)"
         fi
 
-  # Ejecutar Caso 1 (AML)
+  # 3. Ejecutar Caso 1 (AML)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -31,7 +31,7 @@ steps:
         echo ">> Reporte AML (Caso 1)..."
         bq query --use_legacy_sql=false --project_id=${PROJECT_ID} --max_rows=100 < sql/reports/caso_1_aml.sql
 
-  # Ejecutar Caso 2 (Smurfing)
+  # 4. Ejecutar Caso 2 (Smurfing)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
