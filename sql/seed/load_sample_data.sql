@@ -1,17 +1,17 @@
-INSERT INTO `{{PROJECT_ID}}.riesgos.transacciones`
-SELECT
-    GENERATE_UUID() AS id_transaccion,
-    CAST(RAND()*10000 AS INT64) AS id_cliente,
-    CAST(RAND()*5000 AS INT64) AS id_cuenta,
-    TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL CAST(RAND()*365 AS INT64) DAY) AS fecha,
-    ROUND(RAND()*5000, 2) AS monto,
-    ['DEPOSITO', 'RETIRO', 'TRANSFERENCIA', 'PAGO_TARJETA'][OFFSET(CAST(RAND()*4 AS INT64))] AS tipo,
-    ['APP', 'WEB','SUCURSAL', 'ATM'][OFFSET(CAST(RAND()*4 AS INT64))] AS canal,
-    CAST (RAND()*1000 AS INT64) AS id_contraparte,
-    IF (RAND() < 0.5, 'MX', 'US') AS pais_origen,
-    IF (RAND() < 0.5, 'MX', 'US') AS pais_destino,
-    TO_JSON(STRUCT(
-        ROUND(CAST(RAND()*90 + 10 AS NUMERIC), 6) AS lat,
-        ROUND(CAST(RAND()*180 - 90 AS NUMERIC), 6) AS lon,
-    )) AS metadata
-FROM UNNEST(GENERATE_ARRAY(1, 10000));
+INSERT INTO `riesgos.transacciones`
+SELECT 
+  GENERATE_UUID() AS id_transaccion,
+  CAST(RAND()*10000 AS INT64) AS id_cliente,
+  CAST(RAND()*5000 AS INT64) AS id_cuenta,
+  TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL CAST(RAND()*365 AS INT64) DAY) AS fecha,
+  ROUND(RAND()*5000, 2) AS monto,
+  ['DEPOSITO','RETIRO','TRANSFERENCIA','PAGO_TARJETA'][OFFSET(CAST(RAND()*4 AS INT64))] AS tipo,
+  ['APP','WEB','SUCURSAL','ATM'][OFFSET(CAST(RAND()*4 AS INT64))] AS canal,
+  CAST(RAND()*1000 AS INT64) AS id_contraparte,
+  IF(RAND() > 0.5, 'MX', 'US') AS pais_origen,
+  IF(RAND() > 0.5, 'MX', 'US') AS pais_destino,
+  TO_JSON(STRUCT(
+    ROUND(CAST(RAND()*90 + 10 AS NUMERIC), 6) AS lat,
+    ROUND(CAST(RAND()*180 - 90 AS NUMERIC), 6) AS lon
+  )) AS metadata
+FROM UNNEST(GENERATE_ARRAY(1, 100000));
