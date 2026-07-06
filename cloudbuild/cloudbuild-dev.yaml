@@ -14,7 +14,7 @@ steps:
     args:
       - '-c'
       - |
-        ROWS=$(bq query --use_legacy_sql=false --project_id=${PROJECT_ID} --format=csv "SELECT COUNT(*) FROM \`.riesgos.transacciones\`" | tail -n 1)
+        ROWS=$(bq query --use_legacy_sql=false --project_id=${PROJECT_ID} --format=csv "SELECT COUNT(*) FROM \`${PROJECT_ID}.riesgos.transacciones\`" | tail -n 1)
         if [ "$ROWS" -eq "0" ]; then
           echo ">> Cargando datos de muestra..."
           bq query --use_legacy_sql=false --project_id=${PROJECT_ID} < sql/seed/load_sample_data.sql
@@ -39,3 +39,6 @@ steps:
       - |
         echo ">> Reporte Smurfing (Caso 2)..."
         bq query --use_legacy_sql=false --project_id=${PROJECT_ID} --max_rows=100 < sql/reports/caso_2_smurfing.sql
+
+options:
+  defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
