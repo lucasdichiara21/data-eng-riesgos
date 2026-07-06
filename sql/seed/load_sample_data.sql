@@ -1,4 +1,4 @@
-INSERT INTO `${_PROJECT_ID}.riesgos.transacciones`
+INSERT INTO `riesgos.transacciones`
 SELECT
     GENERATE_UUID() AS id_transaccion,
     CAST(RAND()*10000 AS INT64) AS id_cliente,
