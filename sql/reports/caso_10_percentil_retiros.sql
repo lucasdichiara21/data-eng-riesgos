@@ -5,7 +5,7 @@ WITH retiros AS (
     monto
   FROM `riesgos.transacciones`
   WHERE tipo = 'RETIRO'
-    AND fecha >= DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAY)
+    AND DATE(fecha) >= DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAY)
 )
 SELECT 
   id_cliente,
