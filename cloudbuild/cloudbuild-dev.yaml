@@ -1,4 +1,5 @@
 steps:
+  # 1. DDL
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -7,6 +8,7 @@ steps:
         echo ">> Aplicando DDL..."
         bq query --use_legacy_sql=false --project_id=${REPO_NAME} < sql/ddl/tablas_riesgos.sql
 
+  # 2. Seed (Carga de datos)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -20,6 +22,7 @@ steps:
           echo ">> Saltando seed (ya hay $$ROWS filas)"
         fi
 
+  # 3. Caso 1 (AML)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -28,6 +31,7 @@ steps:
         echo ">> Reporte AML (Caso 1)..."
         bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_1_aml.sql
 
+  # 4. Caso 2 (Smurfing)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -35,6 +39,42 @@ steps:
       - |
         echo ">> Reporte Smurfing (Caso 2)..."
         bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_2_smurfing.sql
+
+  # 5. Caso 3 (Saldo Promedio Móvil) - NUEVO
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo ">> Reporte Saldo Promedio (Caso 3)..."
+        bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_3_saldo_promedio.sql
+
+  # 6. Caso 6 (Anomalías) - NUEVO
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo ">> Reporte Anomalías (Caso 6)..."
+        bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_6_anomalias.sql
+
+  # 7. Caso 7 (Geolocalización JSON) - NUEVO
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo ">> Reporte Geolocalización (Caso 7)..."
+        bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_7_geolocalizacion.sql
+
+  # 8. Caso 10 (Percentil 95 / VaR) - NUEVO
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo ">> Reporte Percentil Retiros (Caso 10)..."
+        bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_10_percentil_retiros.sql
 
 options:
   defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
