@@ -56,7 +56,7 @@ steps:
       - '-c'
       - |
         echo ">> Reporte Anomalías (Caso 6)..."
-        bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_6_anomalias.sql
+        bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_6_anomalias.SQL
 
   # 7. Caso 7 (Geolocalización JSON) - NUEVO
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
