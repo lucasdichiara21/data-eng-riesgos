@@ -3,14 +3,14 @@ from apache_beam.options.pipeline_options import PipelineOptions, GoogleCloudOpt
 import json
 from datetime import datetime
 
-
-options=PipelineOptions()
-google_cloud_options = options.view_as(GoogleCloudOptions)
-google_cloud_options.project = 'riesgos-bancarios'
-google_cloud_options.job_name = 'ingesta-transacciones'
-google_cloud_options.staging_location = 'gs://riesgos-bancarios-dataflow/staging'
-google_cloud_options.temp_location = 'gs://riesgos-bancarios-dataflow/temp'
-options.view_as(GoogleCloudOptions).runner = 'DataflowRunner'
+def run():
+    options=PipelineOptions()
+    google_cloud_options = options.view_as(GoogleCloudOptions)
+    google_cloud_options.project = 'riesgos-bancarios'
+    google_cloud_options.job_name = 'ingesta-transacciones'
+    google_cloud_options.staging_location = 'gs://riesgos-bancarios-dataflow/staging'
+    google_cloud_options.temp_location = 'gs://riesgos-bancarios-dataflow/temp'
+    options.view_as(GoogleCloudOptions).runner = 'DataflowRunner'
 
 
 def procesar_transaccion(elemento):
@@ -28,14 +28,13 @@ def procesar_transaccion(elemento):
     except:
         return None 
     
-def run():
     with beam.Pipeline(options=options) as p:
         
         transacciones = (
             p
-            | 'Leer Mensajes' >> beam.io.ReadFromPubSub(
-                subscription='projects/riesgos-bancarios/subscriptions/transacciones-sub')
-            
+            | 'Leer Mensajes' >> beam.io.ReadFromText(
+                'gs://riesgos-bancarios-dataflow/input/test_data.json',
+            )
             |'decodificar JSON' >> beam.map( lambda x: json.loads(x) )
             | 'Procesar Transacciones' >> beam.map(procesar_transaccion)
             | 'Filtrar nulos' >> beam.Filter( lambda x: x is not None )
@@ -46,7 +45,7 @@ def run():
         _=  (
             transacciones
             |'Escribir a BigQuery' >> beam.io.WriteToBigQuery(
-                table='riesgos-bancarios:transacciones.transacciones_procesadas',
+                table='riesgos-bancarios:riesgos.transacciones_streaming',
                 schema='SCHEMA_AUTODETECT',
                 write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
                 create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED

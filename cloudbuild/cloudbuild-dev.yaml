@@ -75,6 +75,7 @@ steps:
       - |
         echo ">> Reporte Percentil Retiros (Caso 10)..."
         bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_10_percentil_retiros.sql
+ 
   # 9. Desplegar pipeline de Dataflow
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
@@ -83,9 +84,7 @@ steps:
       - |
         echo ">> Desplegando pipeline de Dataflow..."
         cd dataflow
-        python3 -m venv .venv
-        source .venv/bin/activate
-        pip install -r requirements.txt
+        pip install --break-system-packages -r requirements.txt
         python3 pipeline_ingesta.py
 options:
   defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
