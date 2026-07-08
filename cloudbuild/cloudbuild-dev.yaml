@@ -54,14 +54,14 @@ steps:
         echo ">> Reporte Saldo Promedio (Caso 3)..."
         bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_3_saldo_promedio.sql
 
-  # 6. Caso 6 Anomalías
+  # 6. Caso 6 Anomalía
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
         echo ">> Reporte Anomalía (Caso 6)..."
-        bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_6_anomalia.sql
+        bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_6_anomalias.sql
 
   # 7. Caso 7 Geolocalización
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
