@@ -84,7 +84,11 @@ steps:
       - |
         echo ">> Desplegando pipeline de Dataflow..."
         cd dataflow
+        # Instalar setuptools y wheel primero (necesario para Beam)
+        pip install --break-system-packages setuptools wheel
+        # Instalar dependencias
         pip install --break-system-packages -r requirements.txt
+        # Ejecutar el pipeline
         python3 pipeline_ingesta.py
 options:
   defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
