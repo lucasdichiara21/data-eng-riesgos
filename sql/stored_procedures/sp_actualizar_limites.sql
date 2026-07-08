@@ -6,8 +6,7 @@ BEGIN
   UPDATE `riesgos.limites_riesgo_cliente`
   SET fecha_fin = DATE_SUB(fecha_actual, INTERVAL 1 DAY),
       es_activo = FALSE
-  WHERE es_activo = TRUE
-    AND id_cliente IN (
+  WHERE es_activo = TRUE AND id_cliente IN (
       SELECT id_cliente 
       FROM `riesgos.transacciones` 
       WHERE DATE(fecha) = DATE_SUB(fecha_actual, INTERVAL 1 DAY)
