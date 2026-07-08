@@ -1,4 +1,9 @@
 steps:
+  # 0. Validación de sintaxis (opcional, lo dejamos comentado para simplificar)
+  # - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  #   entrypoint: 'bash'
+  #   args: ['-c', 'echo "Validando SQL..."']
+
   # 1. DDL
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
@@ -8,7 +13,7 @@ steps:
         echo ">> Aplicando DDL..."
         bq query --use_legacy_sql=false --project_id=${REPO_NAME} < sql/ddl/tablas_riesgos.sql
 
-  # 2. Seed (Carga de datos)
+  # 2. Seed
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -22,7 +27,7 @@ steps:
           echo ">> Saltando seed (ya hay $$ROWS filas)"
         fi
 
-  # 3. Caso 1 (AML)
+  # 3. Caso 1 AML
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -31,7 +36,7 @@ steps:
         echo ">> Reporte AML (Caso 1)..."
         bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_1_aml.sql
 
-  # 4. Caso 2 (Smurfing)
+  # 4. Caso 2 Smurfing
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -40,7 +45,7 @@ steps:
         echo ">> Reporte Smurfing (Caso 2)..."
         bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_2_smurfing.sql
 
-  # 5. Caso 3 (Saldo Promedio Móvil) - NUEVO
+  # 5. Caso 3 Saldo Promedio
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -49,16 +54,16 @@ steps:
         echo ">> Reporte Saldo Promedio (Caso 3)..."
         bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_3_saldo_promedio.sql
 
-  # 6. Caso 6 (Anomalías) - NUEVO
+  # 6. Caso 6 Anomalías
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
         echo ">> Reporte Anomalías (Caso 6)..."
-        bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_6_anomalias.SQL
+        bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_6_anomalias.sql
 
-  # 7. Caso 7 (Geolocalización JSON) - NUEVO
+  # 7. Caso 7 Geolocalización
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -67,7 +72,7 @@ steps:
         echo ">> Reporte Geolocalización (Caso 7)..."
         bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_7_geolocalizacion.sql
 
-  # 8. Caso 10 (Percentil 95 / VaR) - NUEVO
+  # 8. Caso 10 Percentil
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -75,18 +80,17 @@ steps:
       - |
         echo ">> Reporte Percentil Retiros (Caso 10)..."
         bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_10_percentil_retiros.sql
- 
-  # 9. Crear tabla limite de riesgos SCD (Tipo 2)
+
+  # 9. SCD Tipo 2 - Tabla de límites
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
-      -'-c'
-      -|
-       echo ">> Creando tabla limites_riesgo_cliente (SCD Tipo 2)..."
+      - '-c'
+      - |
+        echo ">> Creando tabla limites_riesgo_cliente (SCD Tipo 2)..."
         bq query --use_legacy_sql=false --project_id=${REPO_NAME} < sql/ddl/tabla_limites_riesgo.sql
 
-  # 10. Crear procedimiento de almacenados
-  
+  # 10. Procedimiento almacenado
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -94,7 +98,8 @@ steps:
       - |
         echo ">> Creando procedimiento actualizar_limites_riesgo..."
         bq query --use_legacy_sql=false --project_id=${REPO_NAME} < sql/stored_procedures/sp_actualizar_limites.sql
-  # 11. Inicializar tabla de watermark
+
+  # 11. Watermark
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -103,13 +108,14 @@ steps:
         echo ">> Inicializando watermark..."
         bq query --use_legacy_sql=false --project_id=${REPO_NAME} < sql/watermark/watermark_control.sql
 
-  # 12. Ejecutar carga incremental (solo para mostrar)
+  # 12. Carga incremental (demo)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
         echo ">> Ejecutando carga incremental (demo)..."
-        bq query --use_legacy_sql=false --project_id=${REPO_NAME} < sql/watermark/carga_incremental.sql 
+        bq query --use_legacy_sql=false --project_id=${REPO_NAME} < sql/watermark/carga_incremental.sql
+
 options:
   defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
