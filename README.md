@@ -1,25 +1,28 @@
 # Proyecto Data Engineer - Riesgos Bancarios (GCP)
-# Proyecto Data Engineer - Riesgos Bancarios (GCP)
+
 
 ## 🎯 Objetivo
 Construir un pipeline de datos automatizado para el área de riesgos bancarios, desplegando reportes SQL en BigQuery mediante CI/CD con Cloud Build y orquestación con Airflow.
 
 ---
 
-## ✅ Estado actual del proyecto
-- [x] Repositorio en GitHub conectado a GCP.
-- [x] Trigger de Cloud Build configurado para la rama `dev`.
-- [x] Tabla `transacciones` en BigQuery con partición por fecha y clustering.
-- [x] 100,000 filas de datos de prueba cargados.
-- [x] 6 reportes de riesgo ejecutándose automáticamente en cada `git push`:
-  1. AML (Depósitos > $50,000) – Caso 1
-  2. Estructuramiento (Smurfing) – Caso 2
-  3. Saldo promedio móvil 7 días – Caso 3
-  4. Detección de anomalías (monto > 3x media) – Caso 6
-  5. Extracción de geolocalización desde JSON – Caso 7
-  6. Percentil 95 de retiros (VaR) – Caso 10
-- [x] DAG de Airflow (Cloud Composer) creado y versionado en el repositorio (pendiente de desplegar).
+## ✅ Entregables finales
+- [x] 6 reportes de riesgo (AML, smurfing, saldo móvil, anomalías, geolocalización, VaR).
+- [x] SCD Tipo 2 para límites de riesgo.
+- [x] Watermark y carga incremental.
+- [x] Validación de datos y dead‑letter.
+- [x] Monitoreo de calidad.
+- [x] CI/CD con Cloud Build (dev y producción).
+- [x] SQLFluff para validación de estilo y sintaxis.
+- [x] Documentación completa (README y ARCHITECTURE).
 
+## 🚀 Despliegue
+- `git push origin dev` → despliega en entorno de desarrollo.
+- `git push origin main` → despliega en producción.
+
+## 🔍 Validación de código
+- Pre-commit hook ejecuta SQLFluff y dry-run antes de cada commit.
+- Cloud Build ejecuta SQLFluff antes de cualquier despliegue.
 ---
 
 ## 🧠 Aprendizajes clave (Errores comunes y cómo solucionarlos)
@@ -42,32 +45,3 @@ Construir un pipeline de datos automatizado para el área de riesgos bancarios, 
 3. Cloud Build detecta el cambio y ejecuta los pasos definidos en `cloudbuild/cloudbuild-dev.yaml`.
 4. Los reportes se ejecutan en BigQuery y los resultados quedan disponibles.
 
----
-
-## 📂 Estructura del repositorio
-data-eng-riesgos/
-├── cloudbuild/
-│ └── cloudbuild-dev.yaml # Pipeline de CI/CD
-├── dags/
-│ └── dag_riesgos_diario.py # DAG de Airflow (orquestación)
-├── sql/
-│ ├── ddl/
-│ │ └── tablas_riesgos.sql # Definición de tablas
-│ ├── seed/
-│ │ └── load_sample_data.sql # Datos de prueba
-│ └── reports/
-│ ├── caso_1_aml.sql
-│ ├── caso_2_smurfing.sql
-│ ├── caso_3_saldo_promedio.sql
-│ ├── caso_6_anomalias.sql
-│ ├── caso_7_geolocalizacion.sql
-│ └── caso_10_percentil_retiros.sql
-└── README.md
-
-
----
-
-## 🚀 Próximos pasos
-- Desplegar el DAG de Airflow en Cloud Composer para orquestación diaria.
-- Agregar más reportes (ej: detección de lavado de dinero, scoring de riesgo).
-- Configurar alertas en Slack cuando un reporte falle o detecte algo anómalo.
