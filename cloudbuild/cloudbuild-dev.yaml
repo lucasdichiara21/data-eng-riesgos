@@ -128,18 +128,19 @@ steps:
     args:
       - '-c'
       - |
-        echo ">> Ejecutando script de ingesta desde GCS..."
-        cd scripts
-        pip install --break-system-packages -r requirements.txt
-        python3 ingesta_con-validaciones.py
+        echo ">> Creando dead_letter_transacciones..."
+        bq query --use_legacy_sql=false --project_id=${REPO_NAME} < sql/ddl/dead_letter.sql
+
 # 14. Crear tabla dead-letter
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        echo ">> Creando dead_letter_transacciones..."
-        bq query --use_legacy_sql=false --project_id=${REPO_NAME} < sql/ddl/dead_letter.sql
+        echo ">> Ejecutando script de ingesta desde GCS..."
+        cd scripts
+        pip install --break-system-packages -r requirements.txt
+        python3 ingesta_con-validaciones.py
 
   # 15. Ejecutar script con validaciones
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
