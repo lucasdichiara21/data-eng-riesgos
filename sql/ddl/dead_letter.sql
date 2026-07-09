@@ -6,4 +6,4 @@ CREATE TABLE IF NOT EXISTS `riesgos.dead_letter_transacciones` (
     proceso STRING
 )
 PARTITION BY DATE(fecha_intento)
-CLUSTER BY procesos;
+CLUSTER BY proceso;
