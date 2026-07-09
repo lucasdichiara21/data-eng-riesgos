@@ -21,7 +21,7 @@ SELECT
     id_contraparte,
     pais_origen,
     pais_destino,
-    datos_metadata
+    metadata   
 FROM `riesgos.transacciones`
 WHERE 1 = 0;
 
@@ -38,7 +38,7 @@ SELECT
     id_contraparte,
     pais_origen,
     pais_destino,
-    datos_metadata
+    metadata   
 FROM `riesgos.transacciones`
 WHERE
     DATE(fecha) > fecha_ultima
