@@ -1,0 +1,16 @@
+repos:
+  -repo: local
+  hooks:
+      -id: sqlfluff-lint
+      name: SQLFluff lint
+      entry: bash -c 'sqlfluff lint --dialect bigquery $@'
+      languaje: system
+      files: \.sql$
+      verbose: true
+      -id: bigquery-dry-run
+      name: Bigquery dry run
+      entry: bash -c 'for sql_file in $@; do bq query --dry_run --use_legacy_sql=false --project_id=riesgos-bancarios < $sql_file || exit 1; done'
+      languaje: system
+      files: \.sql$
+      verbose: true
+

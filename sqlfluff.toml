@@ -1,0 +1,20 @@
+[sqlfluff]
+dialect= bigquery
+templater= jinja
+max_line_length= 120
+exclude_rules = L016, L031
+
+[sqlfluff:rules]
+capitalisation.keywords= consistent
+capitalisation.identifiers= consistent
+capitalisation.function= consistent
+aliasing.column= explicit
+aliasing.table= explicit
+
+[sqlfluff:rules:references.consistent]
+ignore_single_quotes = true
+
+[sqlfluff:rules:structure.operator]
+operator_new_lines = after
+
+
