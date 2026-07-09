@@ -1,5 +1,5 @@
 steps:
-   # 0. Validación con SQLFluff
+  # 0. Validación con SQLFluff
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -59,14 +59,14 @@ steps:
         echo ">> Reporte Saldo Promedio (Caso 3)..."
         bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_3_saldo_promedio.sql
 
-  # 6. Caso 6 Anomalía
+  # 6. Caso 6 Anomalías
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        echo ">> Reporte Anomalía (Caso 6)..."
-        bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_6_anomalias.SQL
+        echo ">> Reporte Anomalías (Caso 6)..."
+        bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_6_anomalias.sql
 
   # 7. Caso 7 Geolocalización
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -122,7 +122,7 @@ steps:
         echo ">> Ejecutando carga incremental (demo)..."
         bq query --use_legacy_sql=false --project_id=${REPO_NAME} < sql/watermark/carga_incremental.sql
 
- # 13. Script de ingesta_con-validaciones (alternativa a Dataflow)
+  # 13. Crear tabla dead_letter
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -131,7 +131,7 @@ steps:
         echo ">> Creando dead_letter_transacciones..."
         bq query --use_legacy_sql=false --project_id=${REPO_NAME} < sql/ddl/dead_letter.sql
 
-# 14. Crear tabla dead-letter
+  # 14. Ejecutar script de ingesta con validaciones
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -142,18 +142,7 @@ steps:
         pip install --break-system-packages -r requirements.txt
         python3 ingesta_con_validaciones.py
 
-  # 15. Ejecutar script con validaciones
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        echo ">> Ejecutando ingesta con validaciones..."
-        cd scripts
-        pip install --break-system-packages -r requirements.txt
-        python3 ingesta_con_validaciones.py
-
-  # 16. Consulta de monitoreo
+  # 15. Reporte de calidad (monitoreo)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -161,5 +150,6 @@ steps:
       - |
         echo ">> Reporte de calidad (últimas 24h)..."
         bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/monitoreo/alertas_calidad.sql
+
 options:
   defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
