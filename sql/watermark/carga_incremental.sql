@@ -10,12 +10,35 @@ SET fecha_ultima = (
 
 -- 1. Crear tabla histórica si no existe (copiando esquema sin datos)
 CREATE TABLE IF NOT EXISTS `riesgos.transacciones_historicas` AS
-SELECT * FROM `riesgos.transacciones`
+SELECT
+    id_transaccion,
+    id_cliente,
+    id_cuenta,
+    fecha,
+    monto,
+    tipo,
+    canal,
+    id_contraparte,
+    pais_origen,
+    pais_destino,
+    datos_metadata
+FROM `riesgos.transacciones`
 WHERE 1 = 0;
 
 -- 2. Insertar las transacciones nuevas (desde el watermark hasta hoy)
 INSERT INTO `riesgos.transacciones_historicas`
-SELECT *
+SELECT
+    id_transaccion,
+    id_cliente,
+    id_cuenta,
+    fecha,
+    monto,
+    tipo,
+    canal,
+    id_contraparte,
+    pais_origen,
+    pais_destino,
+    datos_metadata
 FROM `riesgos.transacciones`
 WHERE
     DATE(fecha) > fecha_ultima

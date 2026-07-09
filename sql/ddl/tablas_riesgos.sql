@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS `riesgos.transacciones`
     id_contraparte INT64,
     pais_origen STRING,
     pais_destino STRING,
-    metadata JSON
+    datos_metadata JSON
 )
 PARTITION BY DATE(fecha)
 CLUSTER BY id_cliente, tipo;

@@ -19,5 +19,5 @@ SELECT
     TO_JSON(STRUCT(
         ROUND(CAST(RAND() * 90 + 10 AS NUMERIC), 6) AS lat,
         ROUND(CAST(RAND() * 180 - 90 AS NUMERIC), 6) AS lon
-    )) AS metadata
+    )) AS datos_metadata
 FROM UNNEST(GENERATE_ARRAY(1, 100000));

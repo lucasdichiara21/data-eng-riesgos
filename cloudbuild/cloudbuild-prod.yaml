@@ -1,14 +1,12 @@
 steps:
-   # Validación con SQLFluff (entorno virtual)
+     # 0. Validación con SQLFluff
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
         echo "🔍 Validando estilo SQL con SQLFluff..."
-        python3 -m venv .venv
-        source .venv/bin/activate
-        pip install sqlfluff
+        pip install --break-system-packages sqlfluff
         sqlfluff lint sql/ --dialect bigquery
 
   # 1. DDL

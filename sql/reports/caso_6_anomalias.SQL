@@ -26,4 +26,5 @@ SELECT
     END AS flag_anomalia
 FROM tx_ordenadas
 WHERE media_10_previas IS NOT NULL
+ORDER BY id_transaccion DESC
 LIMIT 1000;
