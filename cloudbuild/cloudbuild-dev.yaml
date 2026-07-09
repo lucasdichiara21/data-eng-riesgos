@@ -140,7 +140,7 @@ steps:
         echo ">> Ejecutando script de ingesta desde GCS..."
         cd scripts
         pip install --break-system-packages -r requirements.txt
-        python3 ingesta_con-validaciones.py
+        python3 ingesta_con_validaciones.py
 
   # 15. Ejecutar script con validaciones
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
