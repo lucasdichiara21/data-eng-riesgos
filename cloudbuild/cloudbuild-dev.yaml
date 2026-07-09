@@ -66,7 +66,7 @@ steps:
       - '-c'
       - |
         echo ">> Reporte Anomalía (Caso 6)..."
-        bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_6_anomalias.sql
+        bq query --use_legacy_sql=false --project_id=${REPO_NAME} --max_rows=100 < sql/reports/caso_6_anomalias.SQL
 
   # 7. Caso 7 Geolocalización
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -122,7 +122,7 @@ steps:
         echo ">> Ejecutando carga incremental (demo)..."
         bq query --use_legacy_sql=false --project_id=${REPO_NAME} < sql/watermark/carga_incremental.sql
 
- # 13. Script de ingesta_con-validaciones (alternativa a Dataflow)
+ # 13. Crear tabla dead-letter
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -131,7 +131,7 @@ steps:
         echo ">> Creando dead_letter_transacciones..."
         bq query --use_legacy_sql=false --project_id=${REPO_NAME} < sql/ddl/dead_letter.sql
 
-# 14. Crear tabla dead-letter
+# 14. Script de ingesta_con-validaciones (alternativa a Dataflow)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
