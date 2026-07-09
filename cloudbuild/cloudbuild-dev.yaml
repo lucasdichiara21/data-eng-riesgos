@@ -122,7 +122,7 @@ steps:
         echo ">> Ejecutando carga incremental (demo)..."
         bq query --use_legacy_sql=false --project_id=${REPO_NAME} < sql/watermark/carga_incremental.sql
 
- # 13. Script de ingesta desde GCS a BigQuery (alternativa a Dataflow)
+ # 13. Script de ingesta_con-validaciones (alternativa a Dataflow)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -131,7 +131,7 @@ steps:
         echo ">> Ejecutando script de ingesta desde GCS..."
         cd scripts
         pip install --break-system-packages -r requirements.txt
-        python3 ingesta_gcs_a_bigquery.py
+        python3 ingesta_con-validaciones.py
 # 14. Crear tabla dead-letter
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
